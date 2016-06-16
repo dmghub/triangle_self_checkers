@@ -1,0 +1,2 @@
+# selfchess
+Javascript triangle selfchess
