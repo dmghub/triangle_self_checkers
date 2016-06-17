@@ -401,7 +401,7 @@ function UndoRedo(action) {
 
 function soundHit() {
     var audio = new Audio();
-    audio.src = 'audio/hit.mp3';
+    audio.src = 'audio/hit.wav';
     audio.autoplay = true;
 }
 
