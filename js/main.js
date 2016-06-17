@@ -1,3 +1,7 @@
+/* Author: Dmitriy Sharko, Ukraine
+ * Email : vakrot@gmail.com
+ */
+
 var catch_point = false;
 var tmpId = "pp";
 var selId = "";
