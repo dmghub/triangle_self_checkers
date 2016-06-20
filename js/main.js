@@ -2,8 +2,9 @@
  * Email : vakrot@gmail.com
  */
 
+var mute = false;
+
 var catch_point = false;
-var tmpId = "pp";
 var selId = "";
 var hitId = 0;
 
@@ -115,7 +116,6 @@ function calculate_sizes() {
     }
 }
 
-
 /* start when  document is loaded */
 function ready() {
     var count = 0;
@@ -134,7 +134,14 @@ function ready() {
 	}
     }
     total_points = count;
-    setup_empty_point(count);
+    var empty = setup_empty_point(count);
+    
+    /* propose first step solution */
+    for (var i = 1; i < count+1; ++i) {
+		if (i == empty) continue;
+		if (checkSolution(i, empty))
+			console.log("Solution:",i,empty);
+	}
 }
 
 /* setup random empty point */
@@ -142,6 +149,7 @@ function setup_empty_point(count) {
     var emptyId = Math.floor((Math.random() * count) + 1);
     var emptyPoint = document.getElementById("p" + emptyId);
     emptyPoint.className = "emptypoint";
+    return emptyId;
 }
 
 
@@ -153,15 +161,13 @@ function getPoint(id, e) {
     if (point.className == "point") {
 	if (catch_point) {
 	    document.getElementById(selId).className = "point";
-	    var tmpPoint = document.getElementById(tmpId);
-	    tmpPoint.style.display = "none";
-	    document.body.removeChild(tmpPoint);
+	    document.body.removeChild(pp);
 	    catch_point = false;
 	    return;
 	}
 	point.className = "emptypoint";
 	var tmpPoint = document.createElement('div');
-	tmpPoint.id = tmpId;
+	tmpPoint.id = "pp";
 
 	tmpPoint.className = "point";
 	setSize(tmpPoint, diameter);
@@ -188,7 +194,6 @@ function getPoint(id, e) {
 	catch_point = true;
     } else {
 	if (catch_point) {
-	    var tmpPoint = document.getElementById(tmpId);
 	    var putPoint = document.getElementById(id);
 
 	    var id1 = +(selId.substr(1));
@@ -206,15 +211,71 @@ function getPoint(id, e) {
 		history_pointer++;
 		putPoint.className = "point";
 	    } else {
-		document.getElementById(selId).className = "point";
+			document.getElementById(selId).className = "point";
 	    }
 
-	    tmpPoint.style.display = "none";
-	    document.body.removeChild(tmpPoint);
+	    document.body.removeChild(pp);
 	    catch_point = false;
 	}
     }
 }
+
+/* check solution */
+function checkSolution (id_src, id_dst) {
+    if (id_src == id_dst) return;
+
+    var idx_src = points[id_src];
+    var idx_dst = points[id_dst];
+    var transaction = false;
+
+    /* horizontal */
+    if (idx_src[0] == idx_dst[0]) {
+	/* check distance */
+	if (3 == (Math.abs(idx_src[1] - idx_dst[1]) + 1))  {
+	    /* check point on empty status between src and dst */
+	    var id = (id_src + id_dst) / 2;
+	    transaction = checkHitPoint(id);
+	}
+    }
+    /* right diagonal */
+    else if (idx_src[1] == idx_dst[1]) {
+	/* check distance */
+	if (3 == (Math.abs(idx_src[0] - idx_dst[0]) + 1)) {
+	    var idx_row = (idx_src[0] + idx_dst[0]) / 2;
+
+	    var reduce = 0;
+	    for (var i = 0; i < idx_row; ++i)
+		reduce += arr[i];
+	    /* check point on empty status between src and dst */
+	    var id = (idx_row - 1)*LEVEL + idx_src[1] - reduce;
+	    transaction = checkHitPoint(id);
+	}
+    }
+    /* left diagonal */
+    else if ((idx_src[0] - idx_dst[0]) == (idx_src[1] - idx_dst[1])) {
+	/* check distance */
+	if ( (3 == (Math.abs(idx_src[1] - idx_dst[1]) + 1)) && 
+		(3 == (Math.abs(idx_src[0] - idx_dst[0]) + 1)) ) {
+
+	    /* check point on empty status between src and dst */
+	    var id_x = (idx_src[0] + idx_dst[0]) / 2;
+	    var id_y = (idx_src[1] + idx_dst[1]) / 2;
+
+	    var reduce = 0;
+	    for (var i = 0; i < id_x; ++i)
+		reduce += arr[i];
+	    /* check point on empty status between src and dst */
+	    var id = (id_x - 1)*LEVEL + id_y - reduce;
+	    transaction = checkHitPoint(id);
+	}
+    }
+    else {
+	/* Not correct transition */
+    }
+    return transaction;
+}
+
+
 
 /* check of logic solution */
 function checkLineSolution (id_src, id_dst) {
@@ -271,17 +332,26 @@ function checkLineSolution (id_src, id_dst) {
     return transaction;
 }
 
+function checkHitPoint(id) {
+    var res = false;
+    var point = document.getElementById("p" + id);
+    if (point.className == "point") {
+		res = true;
+    }
+    return res;
+}
+
 
 function hitPoint(id) {
     var res = false;
     var point = document.getElementById("p" + id);
     if (point.className == "point") {
-	point.className = "emptypoint";
-	hitId = id;
-	res = true;
-	soundHit();
+		point.className = "emptypoint";
+		hitId = id;
+		res = true;
+		soundHit();
 
-	document.getElementById('undo').innerHTML = "<img src=\"img/undo.png\">";
+		document.getElementById('undo').innerHTML = "<img src=\"img/undo.png\">";
     }
     return res;
 }
@@ -290,16 +360,15 @@ function hitPoint(id) {
     добавить ручной режим расстановки фишек
     иметь самому возможность выбрать пустую фишку
     запрет сдвигания фишек которые не могут принять участие в решении
-    сохранение - загрузка игры в - из файл(а)
     подсказка ходов
+    if device is monitor: big background, else small image background
     опция отключения звука
     если осталась одна фишка - то звук выигрыша
     навожу на черную и показывается решение - мигание подстветка желтых
 */
 
 function setSize(elem, d) {
-    elem.style.width = d + "px";
-    elem.style.height = d + "px";
+    elem.style.width = elem.style.height = d + "px";
 }
 
 function setPosition(elem, top, left) {
@@ -311,6 +380,7 @@ function setPosition(elem, top, left) {
 /* Reset game when finished or required by user */
 function refresh() {
     step_history.length = 0;
+    history_pointer = 0;
     for (var i = 1; i < total_points+1; ++i) {
 	var point = document.getElementById("p"+i);
 	point.className = "point";
@@ -357,7 +427,7 @@ function UndoRedo(action) {
     if (step_history.length == 0) return;
     if (catch_point) {
 	document.getElementById(selId).className = "point";
-	document.body.removeChild(document.getElementById(tmpId));
+	document.body.removeChild(pp);
 	catch_point = false;
     }
 
@@ -400,20 +470,18 @@ function UndoRedo(action) {
 }
 
 function soundHit() {
+	if (mute) return;
     var audio = new Audio();
     audio.src = 'audio/hit.wav';
     audio.autoplay = true;
 }
-
-/* create points when document will be loaded */
-document.addEventListener("DOMContentLoaded", ready);
 
 document.onclick = function() {
     if (catch_point) {
 	if (!over_point) {
 	    catch_point = false;
 	    document.getElementById(selId).className = "point";
-	    document.body.removeChild(document.getElementById(tmpId));
+	    document.body.removeChild(pp);
 	}
     }
 }
@@ -434,14 +502,14 @@ function redraw() {
 	setSize(point, diameter);
 	setPosition(point, coords[i-1][0], coords[i-1][1]);
     }
-    
-    var tmpPoint = document.getElementById(tmpId);
+
+	tmpPoint = document.getElementById("pp");
     if (tmpPoint) {
-	var selPoint = document.getElementById(selId);
-	setSize(tmpPoint, diameter);
-	var left = selPoint.style.left.substr(0, selPoint.style.left.length-2);
+        var selPoint = document.getElementById(selId);
+        setSize(pp, diameter);
+        var left = selPoint.style.left.substr(0, selPoint.style.left.length-2);
         var top = selPoint.style.top.substr(0, selPoint.style.top.length-2);
-	setPosition(tmpPoint, (+top - diameter/3), (+left - diameter/3));
+        setPosition(pp, (+top - diameter/3), (+left - diameter/3));
     }
 }
 
@@ -460,3 +528,112 @@ var resize = function(e){
 	time = setTimeout(function(){resize(e);}, 100);
     }
 })();
+
+/* create points when document will be loaded */
+document.addEventListener("DOMContentLoaded", ready);
+
+
+/*********************************************************************/
+
+/* create log file of game and save it */
+function saveGame() {
+	if (step_history.length) {
+		var text = '';
+		text += LEVEL + '\n';
+		
+		for (var i = 0; i < step_history.length; ++i)
+			text += step_history[i] + '\n';
+		
+		var el = document.createElement('a');
+		el.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+		el.setAttribute('download', "game.txt");
+
+		el.style.display = 'none';
+		document.body.appendChild(el);
+
+		el.click();
+		document.body.removeChild(el);
+	}
+}
+
+/* load game */
+function loadGame() {
+	var inputElement = document.createElement("input");	
+	inputElement.setAttribute("type", "file");
+	
+	inputElement.onchange = function() {
+		var fileList = this.files;
+		var textFile = fileList[0];
+
+        if (textFile.type == 'text/plain') {
+            var reader = new FileReader();
+            reader.onloadend = function(event) {
+                var text = event.target.result;
+                //var blob = new Blob([text], { type: 'text/plain' });
+				
+				/* parse text and fill step_history */
+				var data = text.split('\n');
+
+				/* setup LEVEL */
+				var isRebuild  = (LEVEL != +data[0]) ? true : false;
+				LEVEL = +data[0];
+				
+				step_history.length = 0;
+				history_pointer = 0;
+
+				for (var i = 1; i < data.length; ++i) {					
+					var step = data[i].split(',');
+					if (step != "") {
+						step_history.push([+step[0], +step[1], +step[2]]);
+					}
+				}
+				console.log(step_history.length);
+				var emptyId = +(data[1].split(',')[1]);
+
+				/* rebuild points */
+				if (isRebuild) {
+					for (var i = 1; i < total_points+1; ++i) {
+						var point = document.getElementById("p"+i);
+						document.body.removeChild(point);				
+					}
+				
+					arr.length = 1;
+					points.length = 1;
+					update_sizes(document.documentElement.clientWidth, 1000);
+					ready();
+					
+					document.getElementsByClassName("emptypoint")[0].className = "point";
+				} else {
+					for (var i = 1; i < total_points+1; ++i) {
+						var point = document.getElementById("p"+i);
+						point.className = "point";
+					}
+				}
+
+				document.getElementById("p"+emptyId).className = "emptypoint";
+				document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
+				document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";				
+            };
+            reader.onerror = function() {
+                alert('Error reading file');
+            };
+            
+            reader.readAsText(textFile);
+        } else {
+            alert('It\'s not a text file');
+        }
+    };
+    
+    inputElement.click();
+}
+
+
+/* setup audio mode */
+function muteOnOff() {
+	mute = !mute;
+	var icon = "<img src=\"img/audio_enable.png\">";
+	if (mute) {
+		icon = "<img src=\"img/audio_disable.png\">";
+	}
+	document.getElementById('audio').innerHTML = icon;
+}

@@ -7,7 +7,6 @@
 	<title>Selfchess</title>
 	
 	<style>
-
 		h1 {
 			color: rgb(90, 130, 180);
 			font-style: italic;
@@ -16,6 +15,11 @@
 		body {
 			background-color: green;
 			background: url(img/bg_2.jpg);
+		}
+
+		button {
+		    width: 60px;
+		    border-radius: 5px;
 		}
 
 		.point, .emptypoint {
@@ -47,27 +51,26 @@
 		.emptypoint:hover {
 			opacity: 0.70;
 		}
-		
-	
 	</style>
-	
 	<script src="js/main.js"></script>
-
 </head>
 
 <body>
 	<div>
 		<h1>Triangle chess</h1>
-		<button id="reset" style="height:35px; width:90px; border-radius:5px;" onclick="refresh()">Refresh</button>
+		<p><button id="reset" onclick="refresh()"><img src="img/refresh.png"></button>
+		<button id="audio" onclick="muteOnOff()"><img src="img/audio_enable.png"></button></p>
 	</div>
 	<div>
 		<p><button id="undo" onclick="UndoRedo('undo')"><img src="img/nundo.png"></button>
 		   <button id="redo" onclick="UndoRedo('redo')"><img src="img/nredo.png"></button>
 		</p>
 		
-		<p><button id="up" style="width: 90px; border-radius:5px" onclick="levelUpDown('up')">Level <img src="img/up.png"></button></p>
-		<p><button id="down" style="width: 90px; border-radius:5px" onclick="levelUpDown('down')">Level <img src="img/down.png"></button></p>
-		
+		<p><button id="up" onclick="levelUpDown('up')"><img src="img/up.png"></button>
+		<button id="down" onclick="levelUpDown('down')"><img src="img/down.png"></button></p>
+
+		<p><button id="save" onclick="saveGame()"><img src="img/save.png"></button>
+		<button id="open" onclick="loadGame()"><img src="img/open.png"></button></p>
 	</div>
 </body>
 </html>
