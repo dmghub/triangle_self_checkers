@@ -472,11 +472,17 @@ function UndoRedo(action) {
 }
 
 function soundHit() {
-    !mute && document.getElementById("hit").play();
+    if (mute) return;
+    var hit = new Audio();
+    hit.src = "audio/hit.wav";
+    hit.autoplay = true;
 }
 
 function soundWin() {
-    !mute && document.getElementById("win").play();
+    if (mute) return;
+    var win = new Audio();
+    win.src = "audio/win.mp3";
+    win.autoplay = true;
 }
 
 document.onclick = function() {
@@ -572,8 +578,6 @@ function loadGame() {
             var reader = new FileReader();
             reader.onloadend = function(event) {
                 var text = event.target.result;
-                //var blob = new Blob([text], { type: 'text/plain' });
-				
 				/* parse text and fill step_history */
 				var data = text.split('\n');
 
@@ -584,20 +588,19 @@ function loadGame() {
 				step_history.length = 0;
 				history_pointer = 0;
 
-				for (var i = 1; i < data.length; ++i) {					
+				for (var i = 1; i < data.length; ++i) {
 					var step = data[i].split(',');
 					if (step != "") {
 						step_history.push([+step[0], +step[1], +step[2]]);
 					}
 				}
-				console.log(step_history.length);
 				var emptyId = +(data[1].split(',')[1]);
 
 				/* rebuild points */
 				if (isRebuild) {
 					for (var i = 1; i < total_points+1; ++i) {
 						var point = document.getElementById("p"+i);
-						document.body.removeChild(point);				
+						document.body.removeChild(point);
 					}
 				
 					arr.length = 1;
@@ -615,7 +618,7 @@ function loadGame() {
 
 				document.getElementById("p"+emptyId).className = "emptypoint";
 				document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
-				document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";				
+				document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";
             };
             reader.onerror = function() {
                 alert('Error reading file');
