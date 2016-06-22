@@ -201,15 +201,18 @@ function getPoint(id, e) {
 
 	    var result = checkLineSolution(id1, id2);
 	    if (result) {
-		var step = [id1, id2, hitId];
+            var step = [id1, id2, hitId];
+
+                if (document.getElementsByClassName("point").length == 1)
+                    soundWin();
 		
-		if (history_pointer != step_history.length) {
-		    step_history.length = history_pointer;
-		}
+            if (history_pointer != step_history.length) {
+                step_history.length = history_pointer;
+            }
 		
-		step_history.push(step);
-		history_pointer++;
-		putPoint.className = "point";
+            step_history.push(step);
+            history_pointer++;
+            putPoint.className = "point";
 	    } else {
 			document.getElementById(selId).className = "point";
 	    }
@@ -219,6 +222,7 @@ function getPoint(id, e) {
 	}
     }
 }
+
 
 /* check solution */
 function checkSolution (id_src, id_dst) {
@@ -362,8 +366,6 @@ function hitPoint(id) {
     запрет сдвигания фишек которые не могут принять участие в решении
     подсказка ходов
     if device is monitor: big background, else small image background
-    опция отключения звука
-    если осталась одна фишка - то звук выигрыша
     навожу на черную и показывается решение - мигание подстветка желтых
 */
 
@@ -407,7 +409,7 @@ function levelUpDown(action) {
     /* remove old points */
     for (var i = 1; i < total_points+1; ++i) {
 	var point = document.getElementById("p"+i);
-	document.body.removeChild(point);				
+	document.body.removeChild(point);
     }
     
     /* reset relate arrays and variables */
@@ -470,8 +472,11 @@ function UndoRedo(action) {
 }
 
 function soundHit() {
-    if (mute) return;
-    document.getElementById("player").play();
+    !mute && document.getElementById("hit").play();
+}
+
+function soundWin() {
+    !mute && document.getElementById("win").play();
 }
 
 document.onclick = function() {
