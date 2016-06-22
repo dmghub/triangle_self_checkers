@@ -470,10 +470,8 @@ function UndoRedo(action) {
 }
 
 function soundHit() {
-	if (mute) return;
-    var audio = new Audio();
-    audio.src = 'audio/hit.wav';
-    audio.autoplay = true;
+    if (mute) return;
+    document.getElementById("player").play();
 }
 
 document.onclick = function() {
