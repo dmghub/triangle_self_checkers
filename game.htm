@@ -7,10 +7,11 @@
     <!
     <title>Selfchess</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <script src="js/main.js"></script>
+    
 </head>
-
+  
 <body>
+    <div id="page-preloader"><span class="spinner"></span></div>
     <div>
         <h1>Triangle chess</h1>
         <p><button id="reset" onclick="refresh()"><img src="img/refresh.png"></button>
@@ -24,5 +25,9 @@
         <audio id="hit" src="audio/hit.wav"></audio>
         <audio id="win" src="audio/win.mp3"></audio>
     </div>
+
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/animation.js"></script>
 </body>
 </html>
