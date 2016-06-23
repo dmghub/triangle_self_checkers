@@ -37,12 +37,15 @@ var step_history = [];
 var history_pointer = 0;
 
 var coords = [];
+var pStates = [];
+
+var savedInStorage = false;
 
 /* add point on form by XY coordinates */
-function addPoint(id, x, y, D) {
+function addPoint(id, x, y, D, style="point") {
     var point = document.createElement('div');
     point.id = "p" + id;
-    point.className = "point";
+    point.className = style;
     setSize(point, D);
     setPosition(point, y, x);
     point.onmousedown = function(event) {
@@ -118,6 +121,13 @@ function calculate_sizes() {
 
 /* start when  document is loaded */
 function ready() {
+	var load = false;
+	if (localStorage.game && !savedInStorage) {
+		loadFromStorage();
+		if (0 != pStates.length)
+			load = true;
+	}
+
     var count = 0;
 
     // top_point, diametr, dX, dY
@@ -125,23 +135,33 @@ function ready() {
 
     /* add points on form */
     for (i = 1; i < LEVEL+1; ++i) {
-	arr.push(LEVEL-i);
-	for (j = 1; j < i+1; ++j) {
-	    count++;
-	    addPoint(count, coords[count-1][1], coords[count-1][0], diameter);
-	    var idx = [i, j];
-	    points.push(idx);
-	}
+		arr.push(LEVEL-i);
+		for (j = 1; j < i+1; ++j) {
+			count++;
+			if (load) {
+				var style = (pStates[count-1]) ? "point" : "emptypoint";
+				addPoint(count, coords[count-1][1], coords[count-1][0], diameter, style);
+			} else {
+				addPoint(count, coords[count-1][1], coords[count-1][0], diameter);
+			}
+
+			var idx = [i, j];
+			points.push(idx);
+		}
     }
+    
     total_points = count;
-    var empty = setup_empty_point(count);
+    
+    if (!load) {
+		var empty = setup_empty_point(count);
+	}
     
     /* propose first step solution */
-    for (var i = 1; i < count+1; ++i) {
-		if (i == empty) continue;
-		if (checkSolution(i, empty))
-			console.log("Solution:",i,empty);
-	}
+    //for (var i = 1; i < count+1; ++i) {
+	//	if (i == empty) continue;
+	//	if (checkSolution(i, empty))
+	//		console.log("Solution:",i,empty);
+	//}
 }
 
 /* setup random empty point */
@@ -202,7 +222,6 @@ function getPoint(id, e) {
 	    var result = checkLineSolution(id1, id2);
 	    if (result) {
             var step = [id1, id2, hitId];
-
                 if (document.getElementsByClassName("point").length == 1)
                     soundWin();
 		
@@ -213,6 +232,7 @@ function getPoint(id, e) {
             step_history.push(step);
             history_pointer++;
             putPoint.className = "point";
+            saveToStorage("step");
 	    } else {
 			document.getElementById(selId).className = "point";
 	    }
@@ -373,6 +393,7 @@ function setPosition(elem, top, left) {
 
 /* Reset game when finished or required by user */
 function refresh() {
+    localStorage.clear();
     step_history.length = 0;
     history_pointer = 0;
     for (var i = 1; i < total_points+1; ++i) {
@@ -409,6 +430,8 @@ function levelUpDown(action) {
     points.length = 1;
     step_history.length = 0;
     history_pointer = 0;
+	
+	saveToStorage("level");
 
     /* recreate points */
     ready();
@@ -461,6 +484,8 @@ function UndoRedo(action) {
 	}
 
     }
+    
+    saveToStorage("history");
 }
 
 function soundHit() {
@@ -634,4 +659,46 @@ function muteOnOff() {
 		icon = "<img src=\"img/audio_disable.png\">";
 	}
 	document.getElementById('audio').innerHTML = icon;
+}
+
+/* save game state in local Storge */
+function saveToStorage(action) {
+	var points_state = [];
+	if ("level" != action) {
+		for (var i = 1; i < total_points+1; ++i) {
+			if (document.getElementById("p"+i).className == "point") {
+				points_state.push(1);
+			} else {
+				points_state.push(0);
+			}
+		}
+	}
+	
+    var game = { "action": action, "level": LEVEL, "hp": history_pointer, "story": step_history, "points": points_state };
+    var sObj = JSON.stringify(game)
+    localStorage.setItem("game", sObj);
+    savedInStorage = true;
+}
+
+/* load last state of game from local Storage */
+function loadFromStorage() {
+	var game = JSON.parse(localStorage.getItem("game"));
+	LEVEL = game.level;
+	history_pointer = game.hp;
+	step_history = JSON.parse(JSON.stringify(game.story));
+	pStates = JSON.parse(JSON.stringify(game.points));
+	
+	if (history_pointer == 0 && step_history.length == 0) {
+		document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
+		document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
+	} else if (history_pointer == 0) {
+		document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
+		document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";
+	} else if (history_pointer != step_history.length) {
+		document.getElementById('undo').innerHTML = "<img src=\"img/undo.png\">";
+		document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";
+	} else {
+		document.getElementById('undo').innerHTML = "<img src=\"img/undo.png\">";
+		document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
+	}
 }
