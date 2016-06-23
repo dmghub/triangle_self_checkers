@@ -39,8 +39,6 @@ var history_pointer = 0;
 var coords = [];
 var pStates = [];
 
-var savedInStorage = false;
-
 /* add point on form by XY coordinates */
 function addPoint(id, x, y, D, style="point") {
     var point = document.createElement('div');
@@ -119,15 +117,39 @@ function calculate_sizes() {
     }
 }
 
-/* start when  document is loaded */
 function ready() {
-	var load = false;
-	if (localStorage.game && !savedInStorage) {
+	if (localStorage.game) {
 		loadFromStorage();
-		if (0 != pStates.length)
-			load = true;
+		buildPointsFromStorage();
+	} else {
+		buildPoints();
+		saveToStorage("new");
 	}
+}
 
+/* build points from local storage */
+function buildPointsFromStorage() {
+    var count = 0;
+	calculate_sizes();
+
+    /* add points on form */
+    for (i = 1; i < LEVEL+1; ++i) {
+		arr.push(LEVEL-i);
+		for (j = 1; j < i+1; ++j) {
+			count++;
+			var style = (pStates[count-1]) ? "point" : "emptypoint";
+			addPoint(count, coords[count-1][1], coords[count-1][0], diameter, style);
+			var idx = [i, j];
+			points.push(idx);
+		}
+    }
+    total_points = count;
+}
+
+
+
+/* start when  document is loaded */
+function buildPoints() {
     var count = 0;
 
     // top_point, diametr, dX, dY
@@ -138,23 +160,14 @@ function ready() {
 		arr.push(LEVEL-i);
 		for (j = 1; j < i+1; ++j) {
 			count++;
-			if (load) {
-				var style = (pStates[count-1]) ? "point" : "emptypoint";
-				addPoint(count, coords[count-1][1], coords[count-1][0], diameter, style);
-			} else {
-				addPoint(count, coords[count-1][1], coords[count-1][0], diameter);
-			}
-
+			addPoint(count, coords[count-1][1], coords[count-1][0], diameter);
 			var idx = [i, j];
 			points.push(idx);
 		}
     }
     
     total_points = count;
-    
-    if (!load) {
-		var empty = setup_empty_point(count);
-	}
+	var empty = setup_empty_point(count);
     
     /* propose first step solution */
     //for (var i = 1; i < count+1; ++i) {
@@ -432,7 +445,7 @@ function levelUpDown(action) {
     history_pointer = 0;
 
     /* recreate points */
-    ready();
+    buildPoints();
     saveToStorage("level");
     document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
     document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
@@ -622,7 +635,7 @@ function loadGame() {
 					arr.length = 1;
 					points.length = 1;
 					update_sizes(document.documentElement.clientWidth, 1000);
-					ready();
+					buildPoints();
 					
 					document.getElementsByClassName("emptypoint")[0].className = "point";
 				} else {
@@ -635,6 +648,8 @@ function loadGame() {
 				document.getElementById("p"+emptyId).className = "emptypoint";
 				document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
 				document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";
+				
+				saveToStorage("load");
             };
             reader.onerror = function() {
                 alert('Error reading file');
