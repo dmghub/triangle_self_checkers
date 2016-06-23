@@ -393,7 +393,6 @@ function setPosition(elem, top, left) {
 
 /* Reset game when finished or required by user */
 function refresh() {
-    localStorage.clear();
     step_history.length = 0;
     history_pointer = 0;
     for (var i = 1; i < total_points+1; ++i) {
@@ -401,6 +400,7 @@ function refresh() {
 	point.className = "point";
     }
     setup_empty_point(total_points);
+    saveToStorage("refresh");
 
     document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
     document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
@@ -430,11 +430,10 @@ function levelUpDown(action) {
     points.length = 1;
     step_history.length = 0;
     history_pointer = 0;
-	
-	saveToStorage("level");
 
     /* recreate points */
     ready();
+    saveToStorage("level");
     document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
     document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
 }
@@ -664,13 +663,12 @@ function muteOnOff() {
 /* save game state in local Storge */
 function saveToStorage(action) {
 	var points_state = [];
-	if ("level" != action) {
-		for (var i = 1; i < total_points+1; ++i) {
-			if (document.getElementById("p"+i).className == "point") {
-				points_state.push(1);
-			} else {
-				points_state.push(0);
-			}
+
+	for (var i = 1; i < total_points+1; ++i) {
+		if (document.getElementById("p"+i).className == "point") {
+			points_state.push(1);
+		} else {
+			points_state.push(0);
 		}
 	}
 	
