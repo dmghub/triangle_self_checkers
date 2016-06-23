@@ -360,14 +360,6 @@ function hitPoint(id) {
     return res;
 }
 
-/*
-    добавить ручной режим расстановки фишек
-    иметь самому возможность выбрать пустую фишку
-    запрет сдвигания фишек которые не могут принять участие в решении
-    подсказка ходов
-    if device is monitor: big background, else small image background
-    навожу на черную и показывается решение - мигание подстветка желтых
-*/
 
 function setSize(elem, d) {
     elem.style.width = elem.style.height = d + "px";
