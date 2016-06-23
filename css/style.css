@@ -1,0 +1,55 @@
+h1 {
+      color: rgb(90, 130, 180);
+      font-style: italic;
+    }
+
+    p {
+      margin-bottom: 10px;
+      margin-top: 10px;
+    }
+
+    body {
+      background-image: url(../img/bg.jpg),
+       -webkit-linear-gradient(left, rgb(31,63,24), rgb(53,95,45), rgb(31,63,24));
+      background-image: url(../img/bg.jpg),
+       -o-linear-gradient(left, rgb(31,63,24), rgb(53,95,45), rgb(31,63,24));
+      background-image: url(../img/bg.jpg),
+       linear-gradient(to right, rgb(31,63,24), rgb(53,95,45), rgb(31,63,24));;
+    }
+
+    button {
+      width: 60px;
+      height: 40px;
+      background-color: white;
+      border-radius: 5px;
+    }
+
+    .point, .emptypoint {
+      width: 60px;
+      height: 60px;
+      border-style: solid;
+      border-width: 4px;
+      border-radius: 40px;
+      position: absolute;
+    }
+
+    .point {
+       border-color: #ff3030;
+       background: radial-gradient(#ffffdd, #ffff22);
+    }
+
+    .point:hover {
+      border-color: red;
+      background-color: yellow;
+      background: radial-gradient(yellow, yellow);
+    }
+
+    .emptypoint {
+      border-color: red;
+      background-color: #000;
+      opacity: 0.50;
+    }
+
+    .emptypoint:hover {
+      opacity: 0.70;
+    }
