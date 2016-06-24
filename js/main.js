@@ -40,7 +40,7 @@ var coords = [];
 var pStates = [];
 
 /* add point on form by XY coordinates */
-function addPoint(id, x, y, D, style="point") {
+function addPoint(id, x, y, D, style) {
     var point = document.createElement('div');
     point.id = "p" + id;
     point.className = style;
@@ -160,7 +160,7 @@ function buildPoints() {
 		arr.push(LEVEL-i);
 		for (j = 1; j < i+1; ++j) {
 			count++;
-			addPoint(count, coords[count-1][1], coords[count-1][0], diameter);
+			addPoint(count, coords[count-1][1], coords[count-1][0], diameter, "point");
 			var idx = [i, j];
 			points.push(idx);
 		}
