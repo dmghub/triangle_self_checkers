@@ -64,7 +64,6 @@ function findSolutions() {
 			}
 		}
 	}
-	console.log(solutionArea);
 	findSolutionMode = false;
 }
 
@@ -391,7 +390,7 @@ function refresh() {
     }
     setup_empty_point(total_points);
     saveToStorage("refresh");
-
+    findSolutions();
     document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
     document.getElementById('redo').innerHTML = "<img src=\"img/nredo.png\">";
 }
