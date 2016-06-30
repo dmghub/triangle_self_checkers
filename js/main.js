@@ -39,6 +39,36 @@ var history_pointer = 0;
 var coords = [];
 var pStates = [];
 
+var solutionArea = [];
+var findSolutionMode = false;
+
+/* find idx for points which include in solution area */
+function findSolutions() {
+	findSolutionMode = true;
+	solutionArea.length = 0;
+
+	/* get empty points */
+	var Empty = document.getElementsByClassName("emptypoint");
+	var Points = document.getElementsByClassName("point");
+	
+    for (var i = 0; i < Empty.length; ++i) {
+		for (var j = 0; j < Points.length; ++j) {
+			var src = Points[j].id;
+			var dst = Empty[i].id;
+			
+			src = +src.substr(1, src.length);
+			dst = +dst.substr(1, dst.length);
+			
+			if (checkLineSolution(+src, +dst)) {
+				solutionArea.push(src);
+			}
+		}
+	}
+	console.log(solutionArea);
+	findSolutionMode = false;
+}
+
+
 /* add point on form by XY coordinates */
 function addPoint(id, x, y, D, style) {
     var point = document.createElement('div');
@@ -144,6 +174,7 @@ function buildPointsFromStorage() {
 		}
     }
     total_points = count;
+    findSolutions();
 }
 
 
@@ -167,14 +198,8 @@ function buildPoints() {
     }
     
     total_points = count;
-	var empty = setup_empty_point(count);
-    
-    /* propose first step solution */
-    //for (var i = 1; i < count+1; ++i) {
-	//	if (i == empty) continue;
-	//	if (checkSolution(i, empty))
-	//		console.log("Solution:",i,empty);
-	//}
+	setup_empty_point(count);
+	findSolutions();
 }
 
 /* setup random empty point */
@@ -252,66 +277,10 @@ function getPoint(id, e) {
 
 	    document.body.removeChild(pp);
 	    catch_point = false;
+	    findSolutions();
 	}
     }
 }
-
-
-/* check solution */
-function checkSolution (id_src, id_dst) {
-    if (id_src == id_dst) return;
-
-    var idx_src = points[id_src];
-    var idx_dst = points[id_dst];
-    var transaction = false;
-
-    /* horizontal */
-    if (idx_src[0] == idx_dst[0]) {
-	/* check distance */
-	if (3 == (Math.abs(idx_src[1] - idx_dst[1]) + 1))  {
-	    /* check point on empty status between src and dst */
-	    var id = (id_src + id_dst) / 2;
-	    transaction = checkHitPoint(id);
-	}
-    }
-    /* right diagonal */
-    else if (idx_src[1] == idx_dst[1]) {
-	/* check distance */
-	if (3 == (Math.abs(idx_src[0] - idx_dst[0]) + 1)) {
-	    var idx_row = (idx_src[0] + idx_dst[0]) / 2;
-
-	    var reduce = 0;
-	    for (var i = 0; i < idx_row; ++i)
-		reduce += arr[i];
-	    /* check point on empty status between src and dst */
-	    var id = (idx_row - 1)*LEVEL + idx_src[1] - reduce;
-	    transaction = checkHitPoint(id);
-	}
-    }
-    /* left diagonal */
-    else if ((idx_src[0] - idx_dst[0]) == (idx_src[1] - idx_dst[1])) {
-	/* check distance */
-	if ( (3 == (Math.abs(idx_src[1] - idx_dst[1]) + 1)) && 
-		(3 == (Math.abs(idx_src[0] - idx_dst[0]) + 1)) ) {
-
-	    /* check point on empty status between src and dst */
-	    var id_x = (idx_src[0] + idx_dst[0]) / 2;
-	    var id_y = (idx_src[1] + idx_dst[1]) / 2;
-
-	    var reduce = 0;
-	    for (var i = 0; i < id_x; ++i)
-		reduce += arr[i];
-	    /* check point on empty status between src and dst */
-	    var id = (id_x - 1)*LEVEL + id_y - reduce;
-	    transaction = checkHitPoint(id);
-	}
-    }
-    else {
-	/* Not correct transition */
-    }
-    return transaction;
-}
-
 
 
 /* check of logic solution */
@@ -369,27 +338,21 @@ function checkLineSolution (id_src, id_dst) {
     return transaction;
 }
 
-function checkHitPoint(id) {
-    var res = false;
-    var point = document.getElementById("p" + id);
-    if (point.className == "point") {
-		res = true;
-    }
-    return res;
-}
-
 
 function hitPoint(id) {
     var res = false;
     var point = document.getElementById("p" + id);
-    if (point.className == "point") {
+	
+	if (findSolutionMode && (point.className == "point")) {
+		res = true;
+	} else if (point.className == "point") {
 		point.className = "emptypoint";
 		hitId = id;
 		res = true;
 		soundHit();
-
 		document.getElementById('undo').innerHTML = "<img src=\"img/undo.png\">";
-    }
+	}
+
     return res;
 }
 
@@ -498,6 +461,7 @@ function UndoRedo(action) {
     }
     
     saveToStorage("history");
+    findSolutions();
 }
 
 function soundHit() {
