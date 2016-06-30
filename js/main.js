@@ -625,7 +625,7 @@ function loadGame() {
 				document.getElementById("p"+emptyId).className = "emptypoint";
 				document.getElementById('undo').innerHTML = "<img src=\"img/nundo.png\">";
 				document.getElementById('redo').innerHTML = "<img src=\"img/redo.png\">";
-				
+				findSolutions();
 				saveToStorage("load");
             };
             reader.onerror = function() {
