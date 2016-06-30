@@ -218,11 +218,18 @@ function getPoint(id, e) {
 
     if (point.className == "point") {
 	if (catch_point) {
-	    document.getElementById(selId).className = "point";
-	    document.body.removeChild(pp);
-	    catch_point = false;
-	    return;
+		document.getElementById(selId).className = "point";
+		document.body.removeChild(pp);
+		catch_point = false;
+		return;
 	}
+
+	var isSolution = false;
+	var p = +(id.substr(1, id.length));
+	if (-1 != solutionArea.indexOf(p)) {
+		isSolution = true;
+	}
+
 	point.className = "emptypoint";
 	var tmpPoint = document.createElement('div');
 	tmpPoint.id = "pp";
@@ -230,16 +237,16 @@ function getPoint(id, e) {
 	tmpPoint.className = "point";
 	setSize(tmpPoint, diameter);
 	tmpPoint.onclick = function() {
-	    document.getElementById(selId).className = "point";
-	    document.body.removeChild(tmpPoint);
-	    catch_point = false;
+		document.getElementById(selId).className = "point";
+		document.body.removeChild(tmpPoint);
+		catch_point = false;
 	}
 
 	tmpPoint.onmouseover = function(event) {
-	    over_point = true;
+		over_point = true;
 	}
 	tmpPoint.onmouseout = function(event) {
-	    over_point = false;
+		over_point = false;
 	}
 
 	document.body.appendChild(tmpPoint);
@@ -249,7 +256,15 @@ function getPoint(id, e) {
 
 	setPosition(tmpPoint, (+top - diameter/3), (+left - diameter/3));
 	selId = id;
-	catch_point = true;
+
+	if (isSolution) {
+		catch_point = true;
+	} else {
+		window.setTimeout(function() { 
+			document.getElementById(selId).className = "point";
+			document.body.removeChild(pp);
+			catch_point = false; }, 200);
+	}
     } else {
 	if (catch_point) {
 	    var putPoint = document.getElementById(id);
@@ -262,11 +277,11 @@ function getPoint(id, e) {
             var step = [id1, id2, hitId];
                 if (document.getElementsByClassName("point").length == 1)
                     soundWin();
-		
+
             if (history_pointer != step_history.length) {
                 step_history.length = history_pointer;
             }
-		
+
             step_history.push(step);
             history_pointer++;
             putPoint.className = "point";
@@ -281,7 +296,6 @@ function getPoint(id, e) {
 	}
     }
 }
-
 
 /* check of logic solution */
 function checkLineSolution (id_src, id_dst) {
