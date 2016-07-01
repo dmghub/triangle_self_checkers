@@ -1,9 +1,9 @@
 /*
     add Popups (game rules, win alert)
-    manual mode setup empty point
     mode for help steps
-    check solution area and disable moving point if not include in this area, and play sound for not correct getting point
+    play sound for not correct getting point
     blink yellow points when hover on empty point
+    rotate board
 
     adaptation game for mobile devices
     code cleanup, using jQuery
