@@ -1,2 +1,2 @@
-# selfchess
+# selfcheckers
 Javascript triangle selfchess
