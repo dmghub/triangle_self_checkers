@@ -1,2 +1,2 @@
 # selfcheckers
-Javascript triangle selfchess
+Javascript triangle self checkers
